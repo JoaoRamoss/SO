@@ -1,3 +1,3 @@
 # SO
-Repositório da Cadeira de Sistemas Operativos (MIEI - 2º Ano 2º Semestre)  
-Contém as minhas resoluções dos exercícios e fichas fornecidos pelos professores.
+Repositório da Cadeira de Sistemas Operativos (2020/2021)
+Mestrado Integrado em Engenharia Informática (2º Ano 2º Semestre)
