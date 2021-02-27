@@ -45,9 +45,8 @@ ssize_t readln_alt (int fd, char *line, size_t size) {
                 break;
             }
         }
-    if (flag == 0) {
-        for (int j = 0; j < 10; line[k++] = aux[j++], res++);
-    }
+    if (flag == 0) for (int j = 0; j < 10; line[k++] = aux[j++], res++);
+    
     else {
         for (int j = 0; j < i; line[k++] = aux[j++], res++);
         break;
