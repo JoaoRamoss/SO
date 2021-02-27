@@ -9,19 +9,52 @@
 ssize_t readln (int fd, char *line, size_t size) {
     int i = 0;
     char t = 0;
-    ssize_t tam = 0;
+    ssize_t tam = 0, res = 0;;
    do {
        if (i == size-1) {
            size *= 2;
            line = realloc(line, sizeof(char)*size);
        }
         tam = read(fd, &t, 1);
-        if (t != '\n')
+        if (t != '\n') {
             line[i++] = t;
+            res++;
+        }
         else 
             break;
     } while (tam != 0);
-    return i;
+    return res;
+}
+
+//4 (Not sure se era isto que era suposto fazer, mas funciona).
+ssize_t readln_alt (int fd, char *line, size_t size) {
+    int k = 0;
+    char t = 0, aux[10];
+    ssize_t tam = 0, res = 0;
+    do {
+        int i = 0, flag = 0;
+        tam = read(fd, aux, 10);
+        if (k == size-1) {
+            size *= 2;
+            line = realloc(line, sizeof(char)*size);
+        }
+
+        for (i = 0; i < 10; i++){
+            if (aux[i] == '\n') {
+                flag = 1;
+                break;
+            }
+        }
+    if (flag == 0) {
+        for (int j = 0; j < 10; line[k++] = aux[j++], res++);
+    }
+    else {
+        for (int j = 0; j < i; line[k++] = aux[j++], res++);
+        break;
+    }
+        
+    }while (tam != 0);
+    return res;
 }
 
 int main (int argc, char *argv[]) {
