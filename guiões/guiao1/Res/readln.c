@@ -4,17 +4,37 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#define BUF_SIZE 1024
+#define READ_BUF 512
 
-//3
+char read_buffer[READ_BUF];
+int read_buffer_pos = 0;
+int read_buffer_end = 0;
+
+int read_char (int fd, char *c) {
+    if (read_buffer_pos == read_buffer_end) {
+        read_buffer_end = read (fd, read_buffer, READ_BUF);
+
+        switch (read_buffer_end){
+        case -1:
+            perror("read");
+            return -1;
+        case 0: 
+            return 0;    
+        default:
+            read_buffer_pos = 0;
+        }
+    }
+    *c = read_buffer[read_buffer_pos++];
+    return 1;
+}
+
+//3 (Sem realloc, o tamanho do buffer / linha fica ao encargo da função que chama readln)
 ssize_t readln (int fd, char *line, size_t size) {
     int i = 0;
     char t = 0;
     ssize_t tam = 0, res = 0;;
    do {
-       if (i == size-1) {
-           size *= 2;
-           line = realloc(line, sizeof(char)*size);
-       }
         tam = read(fd, &t, 1);
         if (t != '\n') {
             line[i++] = t;
@@ -26,40 +46,24 @@ ssize_t readln (int fd, char *line, size_t size) {
     return res;
 }
 
-//4 (Not sure se era isto que era suposto fazer, mas funciona).
+//4 (Not sure se era isto que era suposto fazer, mas funciona)
 ssize_t readln_alt (int fd, char *line, size_t size) {
-    int k = 0;
-    char t = 0, aux[10];
-    ssize_t tam = 0, res = 0;
-    do {
-        int i = 0, flag = 0;
-        tam = read(fd, aux, 10);
-        if (k == size-1) {
-            size *= 2;
-            line = realloc(line, sizeof(char)*size);
+    ssize_t res = 0;
+    int i = 0;
+    while (i < size && (res = read_char(fd, &line[i])) > 0) {
+        if (line[i] == '\n'){
+            i += res;
+            return i;
         }
-
-        for (i = 0; i < 10; i++){
-            if (aux[i] == '\n') {
-                flag = 1;
-                break;
-            }
-        }
-    if (flag == 0) for (int j = 0; j < 10; line[k++] = aux[j++], res++);
-    
-    else {
-        for (int j = 0; j < i; line[k++] = aux[j++], res++);
-        break;
+        i += res;
     }
-        
-    }while (tam != 0);
-    return res;
+    return i;
 }
 
 int main (int argc, char *argv[]) {
     char *line = malloc(sizeof(char) * 1024);
     int fd_read = open(argv[1], O_RDONLY);
-    ssize_t tamanho_read = readln(fd_read, line, sizeof(char)*1024);
+    ssize_t tamanho_read = readln_alt(fd_read, line, sizeof(char)*1024);
     printf("%s\n", line);
     close(fd_read);
 }
