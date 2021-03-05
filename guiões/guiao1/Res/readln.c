@@ -61,9 +61,12 @@ ssize_t readln_alt (int fd, char *line, size_t size) {
 }
 
 int main (int argc, char *argv[]) {
+    int read_bytes = 0, i = 1, written_bytes = 0;
     char *line = malloc(sizeof(char) * 1024);
-    int fd_read = open(argv[1], O_RDONLY);
-    ssize_t tamanho_read = readln_alt(fd_read, line, sizeof(char)*1024);
-    printf("%s\n", line);
-    close(fd_read);
+    while ((read_bytes = readln_alt (STDIN_FILENO, line, 1024)) > 0) {
+        printf("%d: ", i++);
+        written_bytes += write(STDOUT_FILENO, line, read_bytes);
+    }
+    free(line);
+    return 0;
 }
