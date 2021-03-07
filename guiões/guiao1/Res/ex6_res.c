@@ -26,7 +26,8 @@ int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
         close(fd);
         return 1;
     }
-    else return 0;
+    close(fd);
+    return 0;
 }
 
 int update (char *ficheiro,char *nome, int idade) {
@@ -35,6 +36,7 @@ int update (char *ficheiro,char *nome, int idade) {
     int escrito = 0;
     if (fd < 0) {
         perror("Open Error");
+        close(fd);
         return 1;
     }
     PESSOA aux;
@@ -44,13 +46,16 @@ int update (char *ficheiro,char *nome, int idade) {
             lseek(fd, - sizeof(struct pessoa), SEEK_CUR);
             if (write(fd, &aux, sizeof(struct pessoa))  < 0) {
                 perror("Write Error");
+                close(fd);
                 return 1;
             }
             escrito = 1;
         }
     }
-    if (escrito == 1)
+    if (escrito == 1){
+        close(fd);
         return 0;
+    }
     return 1;
 }
 

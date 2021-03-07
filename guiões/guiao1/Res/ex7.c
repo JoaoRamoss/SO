@@ -9,7 +9,7 @@
 
 typedef struct pessoa {
     int idade; 
-    char nome[BUF_SIZE];
+    char nome[100];
 }PESSOA;
 
 int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
@@ -21,14 +21,14 @@ int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
     }
     p.idade = idade;
     strcpy(p.nome, nome);
-    lseek(fd, 0, SEEK_END);
-    int pos = fd;
+    int pos = lseek(fd, 0, SEEK_END);
     if (write(fd, &p, sizeof(struct pessoa)) < 1) {
         perror("Write Error");
         close(fd);
         return 1;
     }
     printf("Guardado na posicao: %d\n", pos);
+    close(fd);
     return 0;
 }
 
@@ -58,17 +58,21 @@ int update (char *ficheiro,char *nome, int idade) {
         lseek(fd, atoi(nome), SEEK_CUR);
         if (read(fd, &aux, sizeof(struct pessoa)) < 0) {
             perror("Read Error");
+            close(fd);
             return 1;
         }
         lseek(fd, -sizeof(struct pessoa), SEEK_CUR);
         if (write(fd, &aux, sizeof(struct pessoa)) < 0) {
             perror("Write error");
+            close(fd);
             return 1;
         }
             escrito = 1;
     }
-    if (escrito == 1)
+    if (escrito == 1){
+        close(fd);
         return 0;
+    }
     return 1;
 }
 
