@@ -11,23 +11,7 @@ char read_buffer[READ_BUF];
 int read_buffer_pos = 0;
 int read_buffer_end = 0;
 
-int read_char (int fd, char *c) {
-    if (read_buffer_pos == read_buffer_end) {
-        read_buffer_end = read (fd, read_buffer, READ_BUF);
 
-        switch (read_buffer_end){
-        case -1:
-            perror("read");
-            return -1;
-        case 0: 
-            return 0;    
-        default:
-            read_buffer_pos = 0;
-        }
-    }
-    *c = read_buffer[read_buffer_pos++];
-    return 1;
-}
 
 //3 (Sem realloc, o tamanho do buffer / linha fica ao encargo da função que chama readln)
 ssize_t readln (int fd, char *line, size_t size) {
@@ -44,6 +28,24 @@ ssize_t readln (int fd, char *line, size_t size) {
             break;
     } while (tam != 0);
     return res;
+}
+
+int read_char (int fd, char *c) {
+    if (read_buffer_pos == read_buffer_end) {
+        read_buffer_end = read (fd, read_buffer, READ_BUF);
+
+        switch (read_buffer_end){
+        case -1:
+            perror("read");
+            return -1;
+        case 0: 
+            return 0;    
+        default:
+            read_buffer_pos = 0;
+        }
+    }
+    *c = read_buffer[read_buffer_pos++];
+    return 1;
 }
 
 //4 (Not sure se era isto que era suposto fazer, mas funciona)

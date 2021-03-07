@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
+#include <ctype.h>
 #define BUF_SIZE 1024
 
 typedef struct pessoa {
@@ -21,12 +22,14 @@ int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
     p.idade = idade;
     strcpy(p.nome, nome);
     lseek(fd, 0, SEEK_END);
+    int pos = fd;
     if (write(fd, &p, sizeof(struct pessoa)) < 1) {
         perror("Write Error");
         close(fd);
         return 1;
     }
-    else return 0;
+    printf("Guardado na posicao: %d\n", pos);
+    return 0;
 }
 
 int update (char *ficheiro,char *nome, int idade) {
@@ -38,16 +41,31 @@ int update (char *ficheiro,char *nome, int idade) {
         return 1;
     }
     PESSOA aux;
-    while (read(fd, &aux, sizeof(struct pessoa)) > 0 && escrito != 1) {
-        if (strcmp(aux.nome, nome) == 0) {
-            aux.idade = idade;
-            lseek(fd, - sizeof(struct pessoa), SEEK_CUR);
-            if (write(fd, &aux, sizeof(struct pessoa))  < 0) {
-                perror("Write Error");
-                return 1;
+    if (isdigit(nome[0]) != 1) {
+        while (read(fd, &aux, sizeof(struct pessoa)) > 0 && escrito != 1) {
+            if (strcmp(aux.nome, nome) == 0) {
+                aux.idade = idade;
+                lseek(fd, - sizeof(struct pessoa), SEEK_CUR);
+                if (write(fd, &aux, sizeof(struct pessoa))  < 0) {
+                    perror("Write Error");
+                    return 1;
+                }
+                escrito = 1;
             }
-            escrito = 1;
+        }  
+    }
+    else {
+        lseek(fd, atoi(nome), SEEK_CUR);
+        if (read(fd, &aux, sizeof(struct pessoa)) < 0) {
+            perror("Read Error");
+            return 1;
         }
+        lseek(fd, -sizeof(struct pessoa), SEEK_CUR);
+        if (write(fd, &aux, sizeof(struct pessoa)) < 0) {
+            perror("Write error");
+            return 1;
+        }
+            escrito = 1;
     }
     if (escrito == 1)
         return 0;
