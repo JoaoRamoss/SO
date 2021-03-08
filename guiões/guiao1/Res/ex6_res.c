@@ -11,9 +11,24 @@ typedef struct pessoa {
     char nome[BUF_SIZE];
 }PESSOA;
 
+int show_results (int fd, PESSOA p) {
+    lseek(fd, -sizeof(struct pessoa), SEEK_CUR);
+    if (read(fd, &p, sizeof(struct pessoa)) < 0) {
+        perror("Read error na leitura");
+        return 1;
+    }
+    char output [100];
+    sprintf(output, "%d\n", p.idade);
+    write (STDOUT_FILENO, "Nome: ", 6);
+    write(STDOUT_FILENO, p.nome, strlen(p.nome));
+    write(STDOUT_FILENO, "\nIdade: ", 8);
+    write(STDOUT_FILENO, output, strlen(output));
+    return 0;
+}
+
 int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
     printf("Modo de insercao...\n");
-    int fd = open (ficheiro, O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
+    int fd = open (ficheiro, O_CREAT | O_RDWR | O_APPEND, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         perror("Open Error");
         return 1;
@@ -26,6 +41,7 @@ int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
         close(fd);
         return 1;
     }
+    show_results(fd, p);
     close(fd);
     return 0;
 }
@@ -52,6 +68,7 @@ int update (char *ficheiro,char *nome, int idade) {
             escrito = 1;
         }
     }
+    show_results(fd, aux);
     if (escrito == 1){
         close(fd);
         return 0;
