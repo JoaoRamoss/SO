@@ -28,7 +28,7 @@ int show_results (int fd, PESSOA p) {
 
 int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
     printf("Modo de insercao...\n");
-    int fd = open (ficheiro, O_CREAT | O_RDWR | O_APPEND, S_IRUSR | S_IWUSR);
+    int fd = open (ficheiro, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         perror("Open Error");
         return 1;
@@ -56,7 +56,7 @@ int update (char *ficheiro,char *nome, int idade) {
         return 1;
     }
     PESSOA aux;
-    while (read(fd, &aux, sizeof(struct pessoa)) > 0 && escrito != 1) {
+    while (read(fd, &aux, sizeof(struct pessoa)) > 0) {
         if (strcmp(aux.nome, nome) == 0) {
             aux.idade = idade;
             lseek(fd, - sizeof(struct pessoa), SEEK_CUR);
@@ -65,13 +65,10 @@ int update (char *ficheiro,char *nome, int idade) {
                 close(fd);
                 return 1;
             }
-            escrito = 1;
+            show_results(fd, aux);
+            close(fd);
+            return 0;
         }
-    }
-    show_results(fd, aux);
-    if (escrito == 1){
-        close(fd);
-        return 0;
     }
     return 1;
 }

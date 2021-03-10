@@ -30,7 +30,7 @@ int show_results (int fd, PESSOA p) {
 
 int insert (char *ficheiro, PESSOA p, char *nome, int idade) {
     printf("Modo de insercao...\n");
-    int fd = open (ficheiro, O_CREAT | O_RDWR | O_APPEND, S_IRUSR | S_IWUSR);
+    int fd = open (ficheiro, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         perror("Open Error");
         return 1;
@@ -59,7 +59,7 @@ int update (char *ficheiro,char *nome, int idade) {
     }
     PESSOA aux;
     if (isdigit(nome[0]) != 1) { //Verifica se deu o nome ou o endereço.
-        while (read(fd, &aux, sizeof(struct pessoa)) > 0 && escrito != 1) {
+        while (read(fd, &aux, sizeof(struct pessoa)) > 0) {
             if (strcmp(aux.nome, nome) == 0) { //Procura pelo nome inserido.
                 aux.idade = idade; //Atualiza idade
                 lseek(fd, - sizeof(struct pessoa), SEEK_CUR); //Volta a colocar fd no inicio do struct.
@@ -67,13 +67,15 @@ int update (char *ficheiro,char *nome, int idade) {
                     perror("Write Error");
                     return 1;
                 }
-                escrito = 1; //Flag para interromper o ciclo.
+                show_results(fd, aux);
+                close(fd);
+                return 0;
             }
         }  
     }
     else {
         printf("A procurar endereço dado pelo utilizador...\n");
-        lseek(fd, atoi(nome), SEEK_CUR); //Coloca fd no endereço inserido.
+        lseek(fd, atoi(nome)*sizeof(struct pessoa), SEEK_CUR); //Coloca fd no endereço inserido.
         if (read(fd, &aux, sizeof(struct pessoa)) < 0) { //Lê a partir desse endereço.
             perror("Read Error");
             close(fd);
@@ -86,12 +88,9 @@ int update (char *ficheiro,char *nome, int idade) {
             close(fd);
             return 1;
         }
-            escrito = 1; //Flag
-    }
-    show_results(fd, aux);
-    if (escrito == 1){
-        close(fd);
-        return 0;
+            show_results(fd, aux);
+            close(fd);
+            return 0;
     }
     return 1;
 }
